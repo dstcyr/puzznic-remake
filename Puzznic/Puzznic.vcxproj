@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Block.cpp" />
+    <ClCompile Include="Sources\GameObject.cpp" />
     <ClCompile Include="Sources\GameState.cpp" />
     <ClCompile Include="Sources\Levelmanager.cpp" />
     <ClCompile Include="Sources\MenuState.cpp" />
@@ -162,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="Sources\Block.h" />
     <ClInclude Include="Sources\Config.h" />
+    <ClInclude Include="Sources\GameObject.h" />
     <ClInclude Include="Sources\GameState.h" />
     <ClInclude Include="Sources\LevelManager.h" />
     <ClInclude Include="Sources\MenuState.h" />

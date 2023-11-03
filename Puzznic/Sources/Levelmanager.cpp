@@ -57,9 +57,11 @@ void LevelManager::LoadLevel(int levelToLoad)
                         {
                             Block* newBlock = new Block();
                             newBlock->Initialize(tileNum);
+                            newBlock->OnBlockDestroyed.Bind(this, &LevelManager::OnBlockDestroyed);
+
                             int x, y;
                             GetLocalPosition(static_cast<int>(m_gridData.size()) - 1, &x, &y);
-                            newBlock->SetPosition(x, y);
+                            newBlock->SetGridPosition(x, y);
                             m_activeBlocks.push_back(newBlock);
                         }
                     }
@@ -80,6 +82,19 @@ void LevelManager::LoadLevel(int levelToLoad)
     m_selectedBlock = nullptr;
     m_fallingSpeed = 0.0f;
     m_whiteFont = Engine::LoadFont("Assets/Fonts/8bitwonder.ttf", "white18", 30, NColor::White);
+}
+
+void LevelManager::UnloadLevel()
+{
+    for (Block* block : m_activeBlocks)
+    {
+        delete block;
+    }
+
+    m_activeBlocks.clear();
+    m_deletedBlocks.clear();
+    m_gridData.clear();
+    m_loaded = false;
 }
 
 void LevelManager::Render()
@@ -126,17 +141,11 @@ void LevelManager::Render()
         block->Render();
     }
 
-    for (Block* block : m_deletedBlocks)
-    {
-        block->Render();
-    }
-
     m_selector.Render();
-
 
 #if SHOW_DEBUG_GRID
     int x, y;
-    m_selector.GetPosition(&x, &y);
+    m_selector.GetGridPosition(&x, &y);
     Engine::DrawString("{" + std::to_string(x) + ", " + std::to_string(y) + "}", m_whiteFont, 10.0f, 10.0f);
 #endif
 }
@@ -160,7 +169,7 @@ void LevelManager::MoveSelector(int dx, int dy)
     if (m_holding && dy != 0) return;
 
     int x, y;
-    m_selector.GetPosition(&x, &y);
+    m_selector.GetGridPosition(&x, &y);
     int px = x + dx;
     int py = y + dy;
 
@@ -183,6 +192,12 @@ void LevelManager::MoveSelector(int dx, int dy)
         py = y;
     }
 
+    if (m_holding && tile >= 4 && tile <= 11)
+    {
+        px = x;
+        py = y;
+    }
+
     m_selector.SetGridPosition(px, py);
 
     if (m_holding)
@@ -200,7 +215,7 @@ void LevelManager::HoldBlock()
     if (!m_selectedBlock)
     {
         int x, y;
-        m_selector.GetPosition(&x, &y);
+        m_selector.GetGridPosition(&x, &y);
 
         int idx = GetIndexFromPosition(x, y);
         int tileNum = m_gridData[idx];
@@ -222,6 +237,7 @@ void LevelManager::ReleaseBlock()
     }
 
     m_holding = false;
+    m_selector.ResetFlash();
 }
 
 void LevelManager::ChangePosition(int startX, int startY, int endX, int endY, int tileNum)
@@ -247,7 +263,7 @@ bool LevelManager::CanFall(int x, int y)
 void LevelManager::CheckNeighbors(int x, int y, int tileID)
 {
     std::vector<std::pair<int, int>> direction = { {x + 1, y}, {x - 1, y}, {x, y + 1}, {x, y - 1} };
-
+    std::vector<std::string> directionNames = { "RIGHT", "LEFT", "DOWN", "UP" };
     LOG(LL_DEBUG, "FROM %d, %d => TRUE", x, y);
 
     int removeCount = 0;
@@ -259,17 +275,14 @@ void LevelManager::CheckNeighbors(int x, int y, int tileID)
 
         if (tile == tileID)
         {
-            LOG(LL_DEBUG, "%d, %d => TRUE", location.first, location.second);
+            LOG(LL_DEBUG, "%d, %d (%s) => TRUE", location.first, location.second, directionNames[i].c_str());
             Block* block = FindBlockAt(location.first, location.second);
             block->Destroy();
-            m_deletedBlocks.push_back(block);
-
-            Erase(block);
             removeCount++;
         }
         else
         {
-            LOG(LL_DEBUG, "%d, %d => FALSE", location.first, location.second);
+            LOG(LL_DEBUG, "%d, %d (%s) => FALSE", location.first, location.second, directionNames[i].c_str());
         }
 
         i++;
@@ -280,57 +293,17 @@ void LevelManager::CheckNeighbors(int x, int y, int tileID)
         Block* block = FindBlockAt(x, y);
         if (block)
         {
+            int idx = GetIndexFromPosition(x, y);
             block->Destroy();
-            m_deletedBlocks.push_back(block);
-            Erase(block);
         }
     }
 }
 
 void LevelManager::Update(float dt)
 {
-    m_selector.Update(dt, m_holding);
-
-    for (Block* block : m_activeBlocks)
-    {
-        block->Update(dt);
-
-        if (!block->IsFalling())
-        {
-            block->CheckFalling();
-        }
-        else
-        {
-            if (block != nullptr && block == m_selectedBlock && m_holding)
-            {
-                float bx, by;
-                m_selectedBlock->GetPixelPosition(&bx, &by);
-                m_selector.SetPixelPosition(bx, by);
-            }
-        }
-    }
-
-    auto it = m_deletedBlocks.begin();
-    while (it != m_deletedBlocks.end())
-    {
-        if (!(*it)->Update(dt))
-        {
-            int x, y;
-            (*it)->GetGridPosition(&x, &y);
-            int idx = GetIndexFromPosition(x, y);
-            m_gridData[idx] = EMPTY_TILE;
-            it = m_deletedBlocks.erase(it);
-        }
-        else
-        {
-            it++;
-        }
-    }
-
-    if (m_holding && !m_selectedBlock)
-    {
-        m_holding = false;
-    }
+    UpdateSelector(dt);
+    UpdateActiveBlocks(dt);
+    RemoveDeletedBlocks();
 }
 
 int LevelManager::GetIndexFromPosition(int x, int y) const
@@ -356,11 +329,86 @@ void LevelManager::Erase(Block* block)
                 ReleaseBlock();
             }
 
+            int x, y;
+            block->GetGridPosition(&x, &y);
+            int idx = GetIndexFromPosition(x, y);
+            m_gridData[idx] = EMPTY_TILE;
+
             m_activeBlocks.erase(it);
             return;
         }
 
         it++;
+    }
+}
+
+void LevelManager::OnBlockDestroyed(const BlockEvent& blockEvent)
+{
+    Block* block = FindBlockAt(blockEvent.gridX, blockEvent.gridY);
+    if (block)
+    {
+        int idx = GetIndexFromPosition(blockEvent.gridX, blockEvent.gridY);
+        m_deletedBlocks.push_back(block);
+    }
+}
+
+void LevelManager::UpdateActiveBlocks(float dt)
+{
+    if (m_activeBlocks.size() == 0)
+    {
+        OnLevelCleared.Invoke<Event>();
+        return;
+    }
+
+    for (Block* block : m_activeBlocks)
+    {
+        block->Update(dt);
+
+        if (!block->IsFalling())
+        {
+            // If the block is not falling,
+            // check if it can fall right now
+            block->CheckFalling();
+        }
+        else
+        {
+            // If the block is held and falling, 
+            // the selector falls with it
+            if (block != nullptr && block == m_selectedBlock && m_holding)
+            {
+                float bx, by;
+                m_selectedBlock->GetPixelPosition(&bx, &by);
+                m_selector.SetPixelPosition(bx, by);
+            }
+        }
+    }
+}
+
+void LevelManager::UpdateSelector(float dt)
+{
+    if (m_holding)
+    {
+        m_selector.Update(dt);
+        if (!m_selectedBlock)
+        {
+            m_holding = false;
+            m_selector.ResetFlash();
+        }
+    }
+}
+
+void LevelManager::RemoveDeletedBlocks()
+{
+    if (m_deletedBlocks.size() > 0)
+    {
+        auto it = m_deletedBlocks.begin();
+        while (it != m_deletedBlocks.end())
+        {
+            Block* block = *it;
+            Erase(block);
+            block->OnBlockDestroyed.Clear();
+            it = m_deletedBlocks.erase(it);
+        }
     }
 }
 

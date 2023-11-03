@@ -5,14 +5,14 @@ class SaveGame
 {
 public:
     static int highScore;
-    static int round;
-    static int life;
+    static int level;
+    static int retry;
     static int score;
 
     static void CheckHighScore();
     static void Save();
     static void Load();
-    static void NextRound();
+    static void NextLevel();
 
 private:
     static CFile m_saveGameFile;

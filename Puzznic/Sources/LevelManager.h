@@ -2,15 +2,22 @@
 #include <vector>
 #include "Config.h"
 #include "Selector.h"
-
-class Block;
+#include "Block.h"
+#include "Delegate.h"
 
 class LevelManager
 {
 public:
     static LevelManager& Get();
     void LoadLevel(int levelToLoad);
+    void UnloadLevel();
+
     void Update(float dt);
+
+
+
+
+
     void Render();
     bool IsLoaded() const { return m_loaded; }
     void Transform(int localX, int localY, float* worldX, float* worldY);
@@ -22,6 +29,9 @@ public:
     void ChangePosition(int startX, int startY, int endX, int endY, int tileNum);
     bool CanFall(int x, int y);
     void CheckNeighbors(int x, int y, int tileID);
+
+
+    CDelegate OnLevelCleared;
 
 private:
     std::vector<int> m_gridData;
@@ -56,4 +66,9 @@ private:
     void GetLocalPosition(int index, int* outX, int* outY) const;
     Block* FindBlockAt(int x, int y);
     void Erase(Block* block);
+    void UpdateActiveBlocks(float dt);
+    void UpdateSelector(float dt);
+    void RemoveDeletedBlocks();
+
+    void OnBlockDestroyed(const BlockEvent& blockEvent);
 };

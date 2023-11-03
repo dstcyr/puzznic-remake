@@ -2,8 +2,8 @@
 #include "Config.h"
 
 int SaveGame::highScore = 50000;
-int SaveGame::life = STARTING_LIFE;
-int SaveGame::round = START_AT_ROUND;
+int SaveGame::retry = STARTING_RETRY;
+int SaveGame::level = START_AT_LEVEL;
 int SaveGame::score = 0;
 
 CFile SaveGame::m_saveGameFile;
@@ -28,13 +28,13 @@ void SaveGame::Save()
 
 void SaveGame::Load()
 {
-    life = STARTING_LIFE;
-    round = START_AT_ROUND;
+    retry = STARTING_RETRY;
+    level = START_AT_LEVEL;
     score = 0;
 
-    if (CFile::Exists("arkanoid.sav"))
+    if (CFile::Exists("puzznic.sav"))
     {
-        m_saveGameFile.Load("arkanoid.sav");
+        m_saveGameFile.Load("puzznic.sav");
         highScore = m_saveGameFile.ReadInt();
         m_saveGameFile.Release();
     }
@@ -44,7 +44,7 @@ void SaveGame::Load()
     }
 }
 
-void SaveGame::NextRound()
+void SaveGame::NextLevel()
 {
-    round++;
+    level++;
 }

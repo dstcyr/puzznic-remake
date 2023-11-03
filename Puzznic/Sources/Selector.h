@@ -1,27 +1,17 @@
 #pragma once
 #include "Config.h"
+#include "GameObject.h"
 
-class Selector
+class Selector : public GameObject
 {
 public:
     void Initialize();
     void Render();
-    void Update(float dt, bool holding);
-    void GetPosition(int* x, int* y);
-
-
-    void SetGridPosition(int x, int y);
-    void SetPixelPosition(float x, float y);
-
-
-
+    void Update(float dt) override;
+    void ResetFlash();
 
 private:
-    int m_x;
-    int m_y;
-    float m_worldX;
-    float m_worldY;
-    size_t m_selectorImage;
-    float m_holdingElapsed;
-    bool m_flashing;
+    size_t m_selectorImage = 0;
+    float m_holdingElapsed = 0.0f;
+    bool m_flashing = false;
 };
