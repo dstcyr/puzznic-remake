@@ -85,10 +85,16 @@ void Block::SetupInterpolation(int dx, int dy)
     LevelManager::Get().Transform(m_localX, m_localY, &m_interpEndX, &m_interpEndY);
 }
 
-void Block::GetPosition(int* x, int* y)
+void Block::GetGridPosition(int* x, int* y)
 {
     *x = m_localX;
     *y = m_localY;
+}
+
+void Block::GetPixelPosition(float* x, float* y)
+{
+    *x = m_worldX;
+    *y = m_worldY;
 }
 
 void Block::SetPosition(int x, int y)

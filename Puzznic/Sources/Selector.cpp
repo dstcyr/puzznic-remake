@@ -11,9 +11,7 @@ void Selector::Render()
 {
     if (!m_flashing)
     {
-        float wx, wy;
-        LevelManager::Get().Transform(m_x, m_y, &wx, &wy);
-        Engine::DrawTexture(m_selectorImage, wx - (BLOCK_SIZE / 2.0f), wy - (BLOCK_SIZE / 2.0f));
+        Engine::DrawTexture(m_selectorImage, m_worldX - (BLOCK_SIZE / 2.0f), m_worldY - (BLOCK_SIZE / 2.0f));
     }
 }
 
@@ -40,8 +38,16 @@ void Selector::GetPosition(int* x, int* y)
     *y = m_y;
 }
 
-void Selector::SetPosition(int x, int y)
+void Selector::SetGridPosition(int x, int y)
 {
     m_x = x;
     m_y = y;
+    LevelManager::Get().Transform(m_x, m_y, &m_worldX, &m_worldY);
+}
+
+void Selector::SetPixelPosition(float x, float y)
+{
+    m_worldX = x;
+    m_worldY = y;
+    LevelManager::Get().Transform(m_worldX, m_worldY, &m_x, &m_y);
 }

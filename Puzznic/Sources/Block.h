@@ -8,7 +8,12 @@ public:
     void Initialize(int tileID);
     void Render();
     bool Update(float dt);
-    void GetPosition(int* x, int* y);
+    
+    void GetGridPosition(int* x, int* y);
+    void GetPixelPosition(float* x, float* y);
+
+
+
     void SetPosition(int x, int y);
     void MoveTo(int x, int y);
     void Destroy();

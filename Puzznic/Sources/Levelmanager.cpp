@@ -76,7 +76,7 @@ void LevelManager::LoadLevel(int levelToLoad)
 
     int sx, sy;
     FindStartingLocation(&sx, &sy);
-    m_selector.SetPosition(sx, sy);
+    m_selector.SetGridPosition(sx, sy);
     m_selectedBlock = nullptr;
     m_fallingSpeed = 0.0f;
     m_whiteFont = Engine::LoadFont("Assets/Fonts/8bitwonder.ttf", "white18", 30, NColor::White);
@@ -149,9 +149,15 @@ void LevelManager::Transform(int localX, int localY, float* worldX, float* world
     *worldY += (m_cellHeight / 2.0f);
 }
 
+void LevelManager::Transform(float worldX, float worldY, int* localX, int* localY)
+{
+    *localX = static_cast<int>((worldX - m_offsetX) / m_cellWidth);
+    *localY = static_cast<int>((worldY - m_offsetY) / m_cellHeight);
+}
+
 void LevelManager::MoveSelector(int dx, int dy)
 {
-    if(m_holding && dy != 0) return;
+    if (m_holding && dy != 0) return;
 
     int x, y;
     m_selector.GetPosition(&x, &y);
@@ -177,7 +183,7 @@ void LevelManager::MoveSelector(int dx, int dy)
         py = y;
     }
 
-    m_selector.SetPosition(px, py);
+    m_selector.SetGridPosition(px, py);
 
     if (m_holding)
     {
@@ -213,8 +219,9 @@ void LevelManager::ReleaseBlock()
     if (m_selectedBlock)
     {
         m_selectedBlock = nullptr;
-        m_holding = false;
     }
+
+    m_holding = false;
 }
 
 void LevelManager::ChangePosition(int startX, int startY, int endX, int endY, int tileNum)
@@ -256,6 +263,7 @@ void LevelManager::CheckNeighbors(int x, int y, int tileID)
             Block* block = FindBlockAt(location.first, location.second);
             block->Destroy();
             m_deletedBlocks.push_back(block);
+
             Erase(block);
             removeCount++;
         }
@@ -282,6 +290,7 @@ void LevelManager::CheckNeighbors(int x, int y, int tileID)
 void LevelManager::Update(float dt)
 {
     m_selector.Update(dt, m_holding);
+
     for (Block* block : m_activeBlocks)
     {
         block->Update(dt);
@@ -294,9 +303,9 @@ void LevelManager::Update(float dt)
         {
             if (block != nullptr && block == m_selectedBlock && m_holding)
             {
-                int bx, by;
-                m_selectedBlock->GetPosition(&bx, &by);
-                m_selector.SetPosition(bx, by);
+                float bx, by;
+                m_selectedBlock->GetPixelPosition(&bx, &by);
+                m_selector.SetPixelPosition(bx, by);
             }
         }
     }
@@ -307,7 +316,7 @@ void LevelManager::Update(float dt)
         if (!(*it)->Update(dt))
         {
             int x, y;
-            (*it)->GetPosition(&x, &y);
+            (*it)->GetGridPosition(&x, &y);
             int idx = GetIndexFromPosition(x, y);
             m_gridData[idx] = EMPTY_TILE;
             it = m_deletedBlocks.erase(it);
@@ -316,6 +325,11 @@ void LevelManager::Update(float dt)
         {
             it++;
         }
+    }
+
+    if (m_holding && !m_selectedBlock)
+    {
+        m_holding = false;
     }
 }
 
@@ -337,6 +351,11 @@ void LevelManager::Erase(Block* block)
     {
         if (*it == block)
         {
+            if (m_selectedBlock == *it)
+            {
+                ReleaseBlock();
+            }
+
             m_activeBlocks.erase(it);
             return;
         }
@@ -350,7 +369,7 @@ Block* LevelManager::FindBlockAt(int x, int y)
     for (Block* block : m_activeBlocks)
     {
         int bx, by;
-        block->GetPosition(&bx, &by);
+        block->GetGridPosition(&bx, &by);
         if (bx == x && by == y)
         {
             return block;

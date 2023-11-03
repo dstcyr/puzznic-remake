@@ -14,6 +14,7 @@ public:
     void Render();
     bool IsLoaded() const { return m_loaded; }
     void Transform(int localX, int localY, float* worldX, float* worldY);
+    void Transform(float worldX, float worldY, int* localX, int* localY);
     void MoveSelector(int dx, int dy);
 
     void HoldBlock();
