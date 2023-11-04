@@ -22,7 +22,7 @@ struct BlockEvent : public Event
 class Block : public GameObject
 {
 public:
-    void Initialize(int tileID);
+    virtual void Initialize(int tileID);
     void Render();
     void Update(float dt) override;
 
@@ -33,7 +33,7 @@ public:
 
     CDelegate OnBlockDestroyed;
 
-private:
+protected:
     int m_tileID;
     float m_interpTime = 0.0f;
     float m_interpSpeed = 0.2f;
@@ -47,7 +47,8 @@ private:
     bool m_destroyed;
     bool m_destroyedAnimationCompleted = false;
     Animation m_blockAnimation;
+    bool m_moving = false;
 
-    void UpdateInterpolation(float dt);
+    virtual void UpdateInterpolation(float dt);
     void SetupInterpolation(int dx, int dy);
 };

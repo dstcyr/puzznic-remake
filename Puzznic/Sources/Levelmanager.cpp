@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "Block.h"
 #include "Log.h"
+#include "MovingBlock.h"
 
 using namespace tinyxml2;
 
@@ -64,6 +65,16 @@ void LevelManager::LoadLevel(int levelToLoad)
                             newBlock->SetGridPosition(x, y);
                             m_activeBlocks.push_back(newBlock);
                         }
+                        else if (tileNum == 12)
+                        {
+                            MovingBlock* newBlock = new MovingBlock();
+                            newBlock->Initialize(tileNum);
+
+                            int x, y;
+                            GetLocalPosition(static_cast<int>(m_gridData.size()) - 1, &x, &y);
+                            newBlock->SetGridPosition(x, y);
+                            m_MovingBlocks.push_back(newBlock);
+                        }
                     }
                 }
             }
@@ -91,7 +102,13 @@ void LevelManager::UnloadLevel()
         delete block;
     }
 
+    for (Block* block : m_MovingBlocks)
+    {
+        delete block;
+    }
+
     m_activeBlocks.clear();
+    m_MovingBlocks.clear();
     m_deletedBlocks.clear();
     m_gridData.clear();
     m_loaded = false;
@@ -137,6 +154,11 @@ void LevelManager::Render()
     }
 
     for (Block* block : m_activeBlocks)
+    {
+        block->Render();
+    }
+
+    for (Block* block : m_MovingBlocks)
     {
         block->Render();
     }
@@ -192,7 +214,7 @@ void LevelManager::MoveSelector(int dx, int dy)
         py = y;
     }
 
-    if (m_holding && tile >= 4 && tile <= 11)
+    if (m_holding && tile >= 4 && tile <= 12)
     {
         px = x;
         py = y;
@@ -277,8 +299,11 @@ void LevelManager::CheckNeighbors(int x, int y, int tileID)
         {
             LOG(LL_DEBUG, "%d, %d (%s) => TRUE", location.first, location.second, directionNames[i].c_str());
             Block* block = FindBlockAt(location.first, location.second);
-            block->Destroy();
-            removeCount++;
+            if (block)
+            {
+                block->Destroy();
+                removeCount++;
+            }
         }
         else
         {
@@ -299,10 +324,24 @@ void LevelManager::CheckNeighbors(int x, int y, int tileID)
     }
 }
 
+bool LevelManager::CanMoveInDirection(int x, int y, int dx, int dy)
+{
+    int px = x + dx;
+    int py = y + dy;
+    int idx = GetIndexFromPosition(px, py);
+    return m_gridData[idx] == EMPTY_TILE;
+}
+
 void LevelManager::Update(float dt)
 {
     UpdateSelector(dt);
     UpdateActiveBlocks(dt);
+
+    for (Block* block : m_MovingBlocks)
+    {
+        block->Update(dt);
+    }
+
     RemoveDeletedBlocks();
 }
 

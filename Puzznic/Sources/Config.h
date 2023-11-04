@@ -20,7 +20,7 @@ const int LEVEL_OFFSET_Y = 130;
 #define START_IN_GAME 1
 #define SHOW_DEBUG_GRID 1
 #define STARTING_RETRY 2
-#define START_AT_LEVEL 2
+#define START_AT_LEVEL 0
 #define CHANGE_ON_LEVEL_CLEARED 0
 
 #else

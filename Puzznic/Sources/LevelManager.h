@@ -29,13 +29,14 @@ public:
     void ChangePosition(int startX, int startY, int endX, int endY, int tileNum);
     bool CanFall(int x, int y);
     void CheckNeighbors(int x, int y, int tileID);
-
+    bool CanMoveInDirection(int x, int y, int dx, int dy);
 
     CDelegate OnLevelCleared;
 
 private:
     std::vector<int> m_gridData;
     std::vector<Block*> m_activeBlocks;
+    std::vector<Block*> m_MovingBlocks;
     std::vector<Block*> m_deletedBlocks;
 
     int m_offsetX = 0;

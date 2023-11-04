@@ -16,6 +16,7 @@ void Block::Initialize(int tileID)
     m_blockAnimation.Play("idle", false);
     m_falling = false;
     m_destroyed = false;
+    m_moving = false;
 }
 
 void Block::Render()
@@ -47,27 +48,31 @@ void Block::UpdateInterpolation(float dt)
     if (!m_falling) return;
     if (m_destroyed) return;
 
-    if (m_interpTime < m_interpSpeed)
+    if (m_moving)
     {
-        m_pixelX = Engine::Linear(m_interpTime, m_interpStartX, m_interpEndX, m_interpSpeed);
-        m_pixelY = Engine::Linear(m_interpTime, m_interpStartY, m_interpEndY, m_interpSpeed);
-        m_interpTime += dt;
-    }
-    else
-    {
-        LevelManager::Get().ChangePosition(m_interpLocalX, m_interpLocalY, m_gridX, m_gridY, m_tileID);
-        CheckFalling();
-
-        if (!m_falling)
+        if (m_interpTime < m_interpSpeed)
         {
-            LevelManager::Get().CheckNeighbors(m_gridX, m_gridY, m_tileID);
+            m_pixelX = Engine::Linear(m_interpTime, m_interpStartX, m_interpEndX, m_interpSpeed);
+            m_pixelY = Engine::Linear(m_interpTime, m_interpStartY, m_interpEndY, m_interpSpeed);
+            m_interpTime += dt;
+        }
+        else
+        {
+            m_moving = false;
+            LevelManager::Get().ChangePosition(m_interpLocalX, m_interpLocalY, m_gridX, m_gridY, m_tileID);
+            CheckFalling();
+
+            if (!m_falling)
+            {
+                LevelManager::Get().CheckNeighbors(m_gridX, m_gridY, m_tileID);
+            }
         }
     }
 }
 
 void Block::CheckFalling()
 {
-    if(m_destroyed) return;
+    if (m_destroyed) return;
     m_falling = LevelManager::Get().CanFall(m_gridX, m_gridY);
     if (m_falling)
     {
@@ -77,6 +82,7 @@ void Block::CheckFalling()
 
 void Block::SetupInterpolation(int dx, int dy)
 {
+    m_moving = true;
     m_interpTime = 0.0f;
     m_interpStartX = m_pixelX;
     m_interpStartY = m_pixelY;
