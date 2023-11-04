@@ -68,6 +68,12 @@ void Platform::SetupInterpolation(int dx, int dy)
     LevelManager::Get().MoveTile(m_interpSourceX, m_interpSourceY, m_interpTargetX, m_interpTargetY, m_blockID);
 }
 
+void Platform::SetDirection(int dx, int dy)
+{
+    m_directionX = dx;
+    m_directionY = dy;
+}
+
 void Platform::InterpolationCompleted()
 {
     // Snap

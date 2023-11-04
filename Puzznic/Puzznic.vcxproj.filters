@@ -27,6 +27,9 @@
     <ClCompile Include="Sources\AnimatedBlock.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\BlockManager.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\Config.h" />

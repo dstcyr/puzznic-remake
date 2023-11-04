@@ -8,8 +8,6 @@ void Grid::Clear()
 void Grid::Transform(int localX, int localY, float* worldX, float* worldY) const
 {
     ToWorld(localX, localY, worldX, worldY);
-    //*worldX += (m_cellWidth / 2.0f);
-    //*worldY += (m_cellHeight / 2.0f);
 }
 
 void Grid::Transform(float worldX, float worldY, int* localX, int* localY) const

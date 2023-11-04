@@ -20,17 +20,11 @@ void AnimatedBlock::Update(float dt)
     {
         UpdateInterpolation(dt);
     }
-    else
-    {
-        //if (LevelManager::Get().CanFall(m_x, m_y))
-        //{
-        //    SetupInterpolation(0, 1);
-        //}
-    }
 }
 
 void AnimatedBlock::Render()
 {
+#if SHOW_DEBUG_GRID
     Engine::FillRect(
         static_cast<float>(m_x),
         static_cast<float>(m_y),
@@ -44,6 +38,7 @@ void AnimatedBlock::Render()
         static_cast<float>(BLOCK_SIZE),
         static_cast<float>(BLOCK_SIZE),
         NColor::Black);
+#endif
 
     m_blockAnimation.Render({
         static_cast<float>(m_x),
@@ -59,20 +54,14 @@ void AnimatedBlock::UpdateInterpolation(float dt)
     {
         float wx = Engine::Linear(m_interpTime, m_interpStartX, m_interpEndX, m_interpSpeed);
         float wy = Engine::Linear(m_interpTime, m_interpStartY, m_interpEndY, m_interpSpeed);
-        if (LevelManager::Get().CanMove(wx, wy, m_interpDirX, m_interpDirY))
+        if (LevelManager::Get().CanMove(wx, wy))
         {
-            m_x = wx;
-            m_y = wy;
+             m_x = wx;
+             m_y = wy;
         }
         else
         {
-            //InterpolationCompleted();
-            // Snap
             LevelManager::Get().Snap(m_x, m_y, &m_x, &m_y);
-
-            // Move collision
-            //LevelManager::Get().MoveTile(m_interpSourceX, m_interpSourceY, m_interpTargetX, m_interpTargetY, m_blockID);
-
             m_moving = false;
             return;
         }

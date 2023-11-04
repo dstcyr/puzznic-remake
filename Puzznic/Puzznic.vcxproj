@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="Sources\AnimatedBlock.cpp" />
     <ClCompile Include="Sources\Block.cpp" />
+    <ClCompile Include="Sources\BlockManager.cpp" />
     <ClCompile Include="Sources\Entity.cpp" />
     <ClCompile Include="Sources\GameState.cpp" />
     <ClCompile Include="Sources\Grid.cpp" />

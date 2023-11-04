@@ -46,18 +46,6 @@ void Block::UpdateInterpolation(float dt)
     {
         m_x = Engine::Linear(m_interpTime, m_interpStartX, m_interpEndX, m_interpSpeed);
         m_y = Engine::Linear(m_interpTime, m_interpStartY, m_interpEndY, m_interpSpeed);
-
-        /// if (LevelManager::Get().CanMove(wx, wy, 1, 0))
-        /// {
-        ///     m_x = wx;
-        ///     m_y = wy;
-        /// }
-        /// else
-        /// {
-        ///     m_interpTime = m_interpSpeed;
-        ///     return;
-        /// }
-
         m_interpTime += dt;
     }
     else
