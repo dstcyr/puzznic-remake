@@ -6,12 +6,14 @@ const int SCREEN_WIDTH = 1024;
 const int SCREEN_HEIGHT = 962;
 
 const int BLOCK_SIZE = 64;
+const int INVALID_TILE = -1;
 const int EMPTY_TILE = 0;
 const int WALL_TILE = 1;
 const int BACKGROUND_TILE = 2;
 const int SIZE_BACKGROUND_TILE = 3;
 const int LEVEL_OFFSET_X = 320;
 const int LEVEL_OFFSET_Y = 130;
+const float INTERP_SPEED = 0.3f;
 
 #if defined(_DEBUG)
 #define CHECK_MEMORY_LEAKS 0

@@ -1,17 +1,17 @@
 #pragma once
 #include "Block.h"
+#include "Animation.h"
 
-class MovingBlock : public Block
+class AnimatedBlock : public Block
 {
 public:
-    void Initialize(int tileID) override;
+    void Initialize() override;
     void Update(float dt) override;
+    void Render() override;
 
 protected:
     void UpdateInterpolation(float dt) override;
 
 private:
-    int m_dirX = 0;
-    int m_dirY = 0;
-    bool CanMove();
+    Animation m_blockAnimation;
 };

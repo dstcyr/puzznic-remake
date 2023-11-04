@@ -3,9 +3,10 @@
 #include <string>
 #include <sstream>
 #include "Engine.h"
-#include "Block.h"
 #include "Log.h"
-#include "MovingBlock.h"
+#include "AnimatedBlock.h"
+#include "Platform.h"
+#include "Collision.h"
 
 using namespace tinyxml2;
 
@@ -31,7 +32,6 @@ void LevelManager::LoadLevel(int levelToLoad)
         m_height = mapElement->IntAttribute("height");
         m_cellWidth = mapElement->IntAttribute("tilewidth");
         m_cellHeight = mapElement->IntAttribute("tileheight");
-        m_currentLevelDebris = levelToLoad % 4;
         m_totalCell = m_width * m_height;
 
         XMLNode* layerNode = mapNode->FirstChild();
@@ -53,27 +53,38 @@ void LevelManager::LoadLevel(int levelToLoad)
                     {
                         int tileNum = std::stoul(currentToken);
                         m_gridData.push_back(tileNum);
-
+                        //// if (tileNum < 4)
+                        //// {
+                        ////     m_gridData.push_back(tileNum);
+                        //// }
+                        //// else
+                        //// {
+                        ////     m_gridData.push_back(EMPTY_TILE);
+                        //// }
+                        //// 
+                        //// 
+                        //// 
                         if (tileNum >= 4 && tileNum <= 11)
                         {
-                            Block* newBlock = new Block();
-                            newBlock->Initialize(tileNum);
-                            newBlock->OnBlockDestroyed.Bind(this, &LevelManager::OnBlockDestroyed);
+                            float worldX, worldY;
+                            GetWorldPosition(static_cast<int>(m_gridData.size() - 1), &worldX, &worldY);
 
-                            int x, y;
-                            GetLocalPosition(static_cast<int>(m_gridData.size()) - 1, &x, &y);
-                            newBlock->SetGridPosition(x, y);
+                            AnimatedBlock* newBlock = new AnimatedBlock();
+                            newBlock->SetID(tileNum);
+                            newBlock->Initialize();
+                            newBlock->SetPosition(worldX, worldY);
                             m_activeBlocks.push_back(newBlock);
                         }
                         else if (tileNum == 12)
                         {
-                            MovingBlock* newBlock = new MovingBlock();
-                            newBlock->Initialize(tileNum);
+                            float worldX, worldY;
+                            GetWorldPosition(static_cast<int>(m_gridData.size() - 1), &worldX, &worldY);
 
-                            int x, y;
-                            GetLocalPosition(static_cast<int>(m_gridData.size()) - 1, &x, &y);
-                            newBlock->SetGridPosition(x, y);
-                            m_MovingBlocks.push_back(newBlock);
+                            Platform* newBlock = new Platform();
+                            newBlock->SetID(tileNum);
+                            newBlock->Initialize();
+                            newBlock->SetPosition(worldX, worldY);
+                            m_activeBlocks.push_back(newBlock);
                         }
                     }
                 }
@@ -85,36 +96,234 @@ void LevelManager::LoadLevel(int levelToLoad)
 
     m_loaded = true;
 
-    m_selector.Initialize();
-
     int sx, sy;
     FindStartingLocation(&sx, &sy);
-    m_selector.SetGridPosition(sx, sy);
-    m_selectedBlock = nullptr;
-    m_fallingSpeed = 0.0f;
-    m_whiteFont = Engine::LoadFont("Assets/Fonts/8bitwonder.ttf", "white18", 30, NColor::White);
+    m_whiteFont = Engine::LoadFont("Assets/Fonts/8bitwonder.ttf", "white18", 18, NColor::White);
 }
 
 void LevelManager::UnloadLevel()
 {
+    Clear();
+    m_loaded = false;
+
     for (Block* block : m_activeBlocks)
     {
         delete block;
     }
 
-    for (Block* block : m_MovingBlocks)
+    m_activeBlocks.clear();
+}
+
+void LevelManager::Update(float dt)
+{
+    for (Block* block : m_activeBlocks)
     {
-        delete block;
+        block->Update(dt);
     }
 
-    m_activeBlocks.clear();
-    m_MovingBlocks.clear();
-    m_deletedBlocks.clear();
-    m_gridData.clear();
-    m_loaded = false;
+    int y = m_height - 1;
 }
 
 void LevelManager::Render()
+{
+    for (Block* block : m_activeBlocks)
+    {
+        block->Render();
+    }
+
+    RenderGrid();
+
+
+
+    for (int x = 0; x < m_width; x++)
+    {
+        for (int y = 0; y < m_height; y++)
+        {
+            Block* block = GetBlockAt(x, y);
+            if (block && !block->IsMoving() && CanFall(block))
+            {
+                float xx, yy;
+                block->GetPosition(&xx, &yy);
+                Engine::DrawCircle(xx + 32, yy + 32, 10.0f, NColor::Yellow);
+                block->SetupInterpolation(0, 1);
+            }
+        }
+    }
+
+
+    //for (int y = m_height - 1; y >= 0; y--)
+    //{
+    //    bool found = false;
+
+    //    for (int x = 0; x < m_width; x++)
+    //    {
+    //        float xx, yy;
+    //        Transform(x, y, &xx, &yy);
+    //        Engine::DrawLine(-2000.0f, yy, 2000.0f, yy, NColor::Yellow);
+
+    //        int idx = GetIndexFromPosition(x, y);
+    //        if (GetTile(idx) != EMPTY_TILE)
+    //        {
+    //            Block* block = GetBlockAt(x, y);
+    //            if (block && !block->IsMoving() && CanFall(block))
+    //            {
+    //                found = true;
+    //                Engine::DrawCircle(xx + 32, yy + 32, 10.0f, NColor::Yellow);
+    //            }
+
+    //        }
+    //    }
+
+    //    if (found)
+    //    {
+    //        return;
+    //    }
+    //}
+}
+
+int LevelManager::FindGapFrom(float x, float y, int dx, int dy, const std::vector<Block*>& blocks)
+{
+    int gx, gy;
+    Transform(x, y, &gx, &gy);
+
+    gx += dx;
+    gy += dy;
+    int idx = GetIndexFromPosition(gx, gy);
+
+    while (m_gridData[idx] != WALL_TILE)
+    {
+        if (m_gridData[idx] == EMPTY_TILE)
+        {
+            return idx;
+        }
+
+        Block* block = GetBlockAt(gx, gy);
+        for (Block* other : blocks)
+        {
+            if (other != block)
+            {
+                return idx;
+            }
+        }
+        // if (block != nullptr)
+        // {
+        //     blocks.push_back(block);
+        // }
+
+        gx += dx;
+        gy += dy;
+        idx = GetIndexFromPosition(gx, gy);
+    }
+
+    return -1;
+}
+
+void LevelManager::GetBlocksOnTopOf(float x, float y, std::vector<Block*>& blocks)
+{
+    int gx, gy;
+    Transform(x, y, &gx, &gy);
+
+    gy -= 1;
+    int idx = GetIndexFromPosition(gx, gy);
+
+    while (m_gridData[idx] != WALL_TILE)
+    {
+        if (m_gridData[idx] == EMPTY_TILE)
+        {
+            return;
+        }
+
+        Block* block = GetBlockAt(gx, gy);
+        if (block != nullptr)
+        {
+            blocks.push_back(block);
+        }
+
+        gy -= 1;
+        idx = GetIndexFromPosition(gx, gy);
+    }
+}
+
+void LevelManager::MoveTile(int x1, int y1, int x2, int y2, int ID)
+{
+    int sourceIdx = GetIndexFromPosition(x1, y1);
+    int targetIdx = GetIndexFromPosition(x2, y2);
+    m_gridData[targetIdx] = ID;
+    m_gridData[sourceIdx] = EMPTY_TILE;
+}
+
+bool LevelManager::CanFall(float x, float y)
+{
+    int gx, gy;
+    Transform(x, y, &gx, &gy);
+
+    gy += 1;
+    int idx = GetIndexFromPosition(gx, gy);
+    if (m_gridData[idx] == WALL_TILE)
+    {
+        return false;
+    }
+
+    Block* block = GetBlockAt(gx, gy);
+
+    if (block != nullptr)
+    {
+        float otherX, otherY;
+        block->GetPosition(&otherX, &otherY);
+
+        return !Engine::CheckRects(
+            x, y, BLOCK_SIZE, BLOCK_SIZE,
+            otherX, otherY, BLOCK_SIZE, BLOCK_SIZE
+        );
+    }
+
+    return true;
+}
+
+bool LevelManager::CanFall(Block* block)
+{
+    float x, y;
+    block->GetPosition(&x, &y);
+
+    int gx, gy;
+    Transform(x, y, &gx, &gy);
+
+    gy += 1;
+    int idx = GetIndexFromPosition(gx, gy);
+    //if (m_gridData[idx] == WALL_TILE)
+    if (m_gridData[idx] != EMPTY_TILE)
+    {
+        return false;
+    }
+
+    Block* other = GetBlockAt(gx, gy);
+
+    if (other != nullptr)
+    {
+        float otherX, otherY;
+        other->GetPosition(&otherX, &otherY);
+
+        return !Engine::CheckRects(
+            x, y, BLOCK_SIZE, BLOCK_SIZE,
+            otherX, otherY, BLOCK_SIZE, BLOCK_SIZE
+        );
+    }
+
+    return true;
+}
+
+bool LevelManager::CanMove(float x, float y, int dx, int dy)
+{
+    int gx, gy;
+    Transform(x, y, &gx, &gy);
+    gx += dx;
+    gy += dy;
+
+    int idx = GetIndexFromPosition(gx, gy);
+    return m_gridData[idx] != WALL_TILE;
+}
+
+void LevelManager::RenderGrid()
 {
     for (int y = 0; y < m_height; y++)
     {
@@ -131,6 +340,7 @@ void LevelManager::Render()
                 static_cast<float>(m_cellHeight)
             };
 
+            Engine::DrawString(std::to_string(idx), m_whiteFont, dst.x, dst.y);
             if (tile >= WALL_TILE && tile <= SIZE_BACKGROUND_TILE)
             {
                 src.x = m_cellWidth * (tile - 1);
@@ -140,8 +350,10 @@ void LevelManager::Render()
             else if (tile != 0)
             {
 #if SHOW_DEBUG_GRID
-                Engine::FillRect(x * m_cellWidth + m_offsetX, y * m_cellHeight + m_offsetY, m_cellWidth, m_cellHeight, NColor::DarkRed);
-                Engine::DrawRect(x * m_cellWidth + m_offsetX, y * m_cellHeight + m_offsetY, m_cellWidth, m_cellHeight, NColor::Black);
+                //Engine::FillRect(x * m_cellWidth + m_offsetX, y * m_cellHeight + m_offsetY, m_cellWidth, m_cellHeight, NColor::DarkRed);
+                Engine::DrawRect(x * m_cellWidth + m_offsetX - 1, y * m_cellHeight + m_offsetY - 1, m_cellWidth - 2, m_cellHeight - 2, NColor::Red);
+                Engine::DrawRect(x * m_cellWidth + m_offsetX, y * m_cellHeight + m_offsetY, m_cellWidth, m_cellHeight, NColor::Red);
+                Engine::DrawRect(x * m_cellWidth + m_offsetX + 1, y * m_cellHeight + m_offsetY + 1, m_cellWidth - 2, m_cellHeight - 2, NColor::Red);
 #endif
             }
             else
@@ -152,318 +364,42 @@ void LevelManager::Render()
             }
         }
     }
-
-    for (Block* block : m_activeBlocks)
-    {
-        block->Render();
-    }
-
-    for (Block* block : m_MovingBlocks)
-    {
-        block->Render();
-    }
-
-    m_selector.Render();
-
-#if SHOW_DEBUG_GRID
-    int x, y;
-    m_selector.GetGridPosition(&x, &y);
-    Engine::DrawString("{" + std::to_string(x) + ", " + std::to_string(y) + "}", m_whiteFont, 10.0f, 10.0f);
-#endif
 }
 
-
-void LevelManager::Transform(int localX, int localY, float* worldX, float* worldY)
-{
-    ToWorld(localX, localY, worldX, worldY);
-    *worldX += (m_cellWidth / 2.0f);
-    *worldY += (m_cellHeight / 2.0f);
-}
-
-void LevelManager::Transform(float worldX, float worldY, int* localX, int* localY)
-{
-    *localX = static_cast<int>((worldX - m_offsetX) / m_cellWidth);
-    *localY = static_cast<int>((worldY - m_offsetY) / m_cellHeight);
-}
-
-void LevelManager::MoveSelector(int dx, int dy)
-{
-    if (m_holding && dy != 0) return;
-
-    int x, y;
-    m_selector.GetGridPosition(&x, &y);
-    int px = x + dx;
-    int py = y + dy;
-
-    if (px < 0 || px > m_width)
-    {
-        px = x;
-    }
-
-    if (py < 0 || py > m_height)
-    {
-        py = y;
-    }
-
-    int idx = GetIndexFromPosition(px, py);
-    int tile = m_gridData[idx];
-
-    if (tile == BACKGROUND_TILE || tile == SIZE_BACKGROUND_TILE || tile == WALL_TILE)
-    {
-        px = x;
-        py = y;
-    }
-
-    if (m_holding && tile >= 4 && tile <= 12)
-    {
-        px = x;
-        py = y;
-    }
-
-    m_selector.SetGridPosition(px, py);
-
-    if (m_holding)
-    {
-        idx = GetIndexFromPosition(px, py);
-        if (m_selectedBlock)
-        {
-            m_selectedBlock->MoveTo(px, py);
-        }
-    }
-}
-
-void LevelManager::HoldBlock()
-{
-    if (!m_selectedBlock)
-    {
-        int x, y;
-        m_selector.GetGridPosition(&x, &y);
-
-        int idx = GetIndexFromPosition(x, y);
-        int tileNum = m_gridData[idx];
-        m_holding = false;
-
-        if (tileNum >= 4 && tileNum <= 11)
-        {
-            m_selectedBlock = FindBlockAt(x, y);
-            m_holding = m_selectedBlock != nullptr;
-        }
-    }
-}
-
-void LevelManager::ReleaseBlock()
-{
-    if (m_selectedBlock)
-    {
-        m_selectedBlock = nullptr;
-    }
-
-    m_holding = false;
-    m_selector.ResetFlash();
-}
-
-void LevelManager::ChangePosition(int startX, int startY, int endX, int endY, int tileNum)
-{
-    int startIdx = GetIndexFromPosition(startX, startY);
-    int endIdx = GetIndexFromPosition(endX, endY);
-
-    m_gridData[startIdx] = EMPTY_TILE;
-    m_gridData[endIdx] = tileNum;
-}
-
-bool LevelManager::CanFall(int x, int y)
-{
-    int idx = GetIndexFromPosition(x, y + 1);
-    if (idx < static_cast<int>(m_gridData.size()))
-    {
-        return m_gridData[idx] == EMPTY_TILE;
-    }
-
-    return false;
-}
-
-void LevelManager::CheckNeighbors(int x, int y, int tileID)
-{
-    std::vector<std::pair<int, int>> direction = { {x + 1, y}, {x - 1, y}, {x, y + 1}, {x, y - 1} };
-    std::vector<std::string> directionNames = { "RIGHT", "LEFT", "DOWN", "UP" };
-    LOG(LL_DEBUG, "FROM %d, %d => TRUE", x, y);
-
-    int removeCount = 0;
-    int i = 0;
-    for (auto& location : direction)
-    {
-        int idx = GetIndexFromPosition(location.first, location.second);
-        int tile = m_gridData[idx];
-
-        if (tile == tileID)
-        {
-            LOG(LL_DEBUG, "%d, %d (%s) => TRUE", location.first, location.second, directionNames[i].c_str());
-            Block* block = FindBlockAt(location.first, location.second);
-            if (block)
-            {
-                block->Destroy();
-                removeCount++;
-            }
-        }
-        else
-        {
-            LOG(LL_DEBUG, "%d, %d (%s) => FALSE", location.first, location.second, directionNames[i].c_str());
-        }
-
-        i++;
-    }
-
-    if (removeCount > 0)
-    {
-        Block* block = FindBlockAt(x, y);
-        if (block)
-        {
-            int idx = GetIndexFromPosition(x, y);
-            block->Destroy();
-        }
-    }
-}
-
-bool LevelManager::CanMoveInDirection(int x, int y, int dx, int dy)
-{
-    int px = x + dx;
-    int py = y + dy;
-    int idx = GetIndexFromPosition(px, py);
-    return m_gridData[idx] == EMPTY_TILE;
-}
-
-void LevelManager::Update(float dt)
-{
-    UpdateSelector(dt);
-    UpdateActiveBlocks(dt);
-
-    for (Block* block : m_MovingBlocks)
-    {
-        block->Update(dt);
-    }
-
-    RemoveDeletedBlocks();
-}
-
-int LevelManager::GetIndexFromPosition(int x, int y) const
-{
-    return x + m_width * y;
-}
-
-void LevelManager::GetLocalPosition(int index, int width, int* outX, int* outY) const
-{
-    *outY = static_cast<int>(index) / width;
-    *outX = static_cast<int>(index) - width * *outY;
-}
-
-void LevelManager::Erase(Block* block)
-{
-    auto it = m_activeBlocks.begin();
-    while (it != m_activeBlocks.end())
-    {
-        if (*it == block)
-        {
-            if (m_selectedBlock == *it)
-            {
-                ReleaseBlock();
-            }
-
-            int x, y;
-            block->GetGridPosition(&x, &y);
-            int idx = GetIndexFromPosition(x, y);
-            m_gridData[idx] = EMPTY_TILE;
-
-            m_activeBlocks.erase(it);
-            return;
-        }
-
-        it++;
-    }
-}
-
-void LevelManager::OnBlockDestroyed(const BlockEvent& blockEvent)
-{
-    Block* block = FindBlockAt(blockEvent.gridX, blockEvent.gridY);
-    if (block)
-    {
-        int idx = GetIndexFromPosition(blockEvent.gridX, blockEvent.gridY);
-        m_deletedBlocks.push_back(block);
-    }
-}
-
-void LevelManager::UpdateActiveBlocks(float dt)
-{
-    if (m_activeBlocks.size() == 0)
-    {
-        OnLevelCleared.Invoke<Event>();
-        return;
-    }
-
-    for (Block* block : m_activeBlocks)
-    {
-        block->Update(dt);
-
-        if (!block->IsFalling())
-        {
-            // If the block is not falling,
-            // check if it can fall right now
-            block->CheckFalling();
-        }
-        else
-        {
-            // If the block is held and falling, 
-            // the selector falls with it
-            if (block != nullptr && block == m_selectedBlock && m_holding)
-            {
-                float bx, by;
-                m_selectedBlock->GetPixelPosition(&bx, &by);
-                m_selector.SetPixelPosition(bx, by);
-            }
-        }
-    }
-}
-
-void LevelManager::UpdateSelector(float dt)
-{
-    if (m_holding)
-    {
-        m_selector.Update(dt);
-        if (!m_selectedBlock)
-        {
-            m_holding = false;
-            m_selector.ResetFlash();
-        }
-    }
-}
-
-void LevelManager::RemoveDeletedBlocks()
-{
-    if (m_deletedBlocks.size() > 0)
-    {
-        auto it = m_deletedBlocks.begin();
-        while (it != m_deletedBlocks.end())
-        {
-            Block* block = *it;
-            Erase(block);
-            block->OnBlockDestroyed.Clear();
-            it = m_deletedBlocks.erase(it);
-        }
-    }
-}
-
-Block* LevelManager::FindBlockAt(int x, int y)
+Block* LevelManager::GetBlockAt(int x, int y)
 {
     for (Block* block : m_activeBlocks)
     {
-        int bx, by;
-        block->GetGridPosition(&bx, &by);
-        if (bx == x && by == y)
+        float wx, wy;
+        block->GetPosition(&wx, &wy);
+
+        int gx, gy;
+        Transform(wx, wy, &gx, &gy);
+
+        if (gx == x && gy == y)
         {
             return block;
         }
     }
 
     return nullptr;
+}
+
+bool LevelManager::GetTile(int idx)
+{
+    if (idx >= 0 && idx <= m_totalCell - 1)
+    {
+        return m_gridData[idx];
+    }
+
+    return INVALID_TILE;
+}
+
+void LevelManager::Snap(float x, float y, float* wx, float* wy)
+{
+    int gx, gy;
+    Transform(x, y, &gx, &gy);
+    Transform(gx, gy, wx, wy);
 }
 
 void LevelManager::FindStartingLocation(int* x, int* y)
@@ -485,16 +421,4 @@ void LevelManager::FindStartingLocation(int* x, int* y)
 
     *x = 0;
     *y = 0;
-}
-
-void LevelManager::ToWorld(const int localX, const int localY, float* worldX, float* worldY) const
-{
-    *worldX = static_cast<float>(localX * m_cellWidth) + m_offsetX;
-    *worldY = static_cast<float>(localY * m_cellHeight) + m_offsetY;
-}
-
-void LevelManager::GetLocalPosition(int index, int* outX, int* outY) const
-{
-    *outY = static_cast<int>(index) / m_width;
-    *outX = static_cast<int>(index) - m_width * *outY;
 }

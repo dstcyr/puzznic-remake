@@ -12,19 +12,21 @@
       <Filter>Game</Filter>
     </ClCompile>
     <ClCompile Include="Sources\SaveGame.cpp" />
-    <ClCompile Include="Sources\Selector.cpp">
-      <Filter>Game</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Block.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\GameObject.cpp">
+    <ClCompile Include="Sources\Entity.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\MovingBlocks.cpp">
+    <ClCompile Include="Sources\Grid.cpp">
       <Filter>Game</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\MovingBlock.cpp" />
+    <ClCompile Include="Sources\Platform.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\AnimatedBlock.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\Config.h" />
@@ -38,16 +40,19 @@
       <Filter>Game</Filter>
     </ClInclude>
     <ClInclude Include="Sources\SaveGame.h" />
-    <ClInclude Include="Sources\Selector.h">
-      <Filter>Game</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Block.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\GameObject.h">
+    <ClInclude Include="Sources\Entity.h">
       <Filter>Game</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\MovingBlock.h">
+    <ClInclude Include="Sources\Grid.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\AnimatedBlock.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Platform.h">
       <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>

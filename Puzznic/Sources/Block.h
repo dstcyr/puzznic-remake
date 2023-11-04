@@ -1,54 +1,31 @@
 #pragma once
+#include "Entity.h"
 #include "Config.h"
-#include "Animation.h"
-#include "GameObject.h"
-#include "Delegate.h"
 
-struct BlockEvent : public Event
-{
-    BlockEvent() : tile(0), gridX(0), gridY(0)
-    {
-    }
-
-    BlockEvent(int tile, int x, int y) : tile(tile), gridX(x), gridY(y)
-    {
-    }
-
-    int tile = 0;
-    int gridX = 0;
-    int gridY = 0;
-};
-
-class Block : public GameObject
+class Block : public Entity
 {
 public:
-    virtual void Initialize(int tileID);
-    void Render();
-    void Update(float dt) override;
-
-    void MoveTo(int x, int y);
-    void Destroy();
-    void CheckFalling();
-    bool IsFalling() const { return m_falling; }
-
-    CDelegate OnBlockDestroyed;
+    void Render() override;
+    void SetID(int ID);
+    virtual void SetupInterpolation(int dx, int dy);
+    bool IsMoving() const { return m_moving; }
 
 protected:
-    int m_tileID;
     float m_interpTime = 0.0f;
-    float m_interpSpeed = 0.2f;
+    float m_interpSpeed = INTERP_SPEED;
     float m_interpStartX = 0.0f;
     float m_interpStartY = 0.0f;
     float m_interpEndX = 0.0f;
     float m_interpEndY = 0.0f;
-    int m_interpLocalX = 0;
-    int m_interpLocalY = 0;
-    bool m_falling;
-    bool m_destroyed;
-    bool m_destroyedAnimationCompleted = false;
-    Animation m_blockAnimation;
+    int m_interpTargetX = 0;
+    int m_interpTargetY = 0;
+    int m_interpSourceX = 0;
+    int m_interpSourceY = 0;
+    int m_interpDirX = 0;
+    int m_interpDirY = 0;
     bool m_moving = false;
+    int m_blockID = -1;
 
     virtual void UpdateInterpolation(float dt);
-    void SetupInterpolation(int dx, int dy);
+    virtual void InterpolationCompleted();
 };

@@ -1,75 +1,44 @@
 #pragma once
 #include <vector>
 #include "Config.h"
-#include "Selector.h"
-#include "Block.h"
 #include "Delegate.h"
+#include "Block.h"
+#include "Grid.h"
 
-class LevelManager
+class LevelManager : public Grid
 {
 public:
     static LevelManager& Get();
     void LoadLevel(int levelToLoad);
     void UnloadLevel();
-
     void Update(float dt);
-
-
-
-
-
     void Render();
     bool IsLoaded() const { return m_loaded; }
-    void Transform(int localX, int localY, float* worldX, float* worldY);
-    void Transform(float worldX, float worldY, int* localX, int* localY);
-    void MoveSelector(int dx, int dy);
-
-    void HoldBlock();
-    void ReleaseBlock();
-    void ChangePosition(int startX, int startY, int endX, int endY, int tileNum);
-    bool CanFall(int x, int y);
-    void CheckNeighbors(int x, int y, int tileID);
-    bool CanMoveInDirection(int x, int y, int dx, int dy);
 
     CDelegate OnLevelCleared;
 
-private:
-    std::vector<int> m_gridData;
-    std::vector<Block*> m_activeBlocks;
-    std::vector<Block*> m_MovingBlocks;
-    std::vector<Block*> m_deletedBlocks;
 
-    int m_offsetX = 0;
-    int m_offsetY = 0;
-    int m_width = 0;
-    int m_height = 0;
-    int m_cellWidth = 0;
-    int m_cellHeight = 0;
-    int m_totalCell = 0;
-    int m_currentLevelDebris = 0;
+    int FindGapFrom(float x, float y, int dx, int dy, const std::vector<Block*>& blocks);
+    void GetBlocksOnTopOf(float x, float y, std::vector<Block*>& blocks);
+    void MoveTile(int x1, int y1, int x2, int y2, int ID);
+    bool CanFall(float x, float y);
+    bool CanFall(Block* block);
+    bool CanMove(float x, float y, int dx, int dy);
+    void Snap(float x, float y, float* wx, float* wy);
+
+
+private:
+    std::vector<Block*> m_activeBlocks;
     bool m_loaded = false;
     size_t m_backgroundTiles = 0;
     size_t m_whiteFont = 0;
-    Selector m_selector;
-    bool m_holding = false;
-    float m_fallingSpeed;
-
-    Block* m_selectedBlock;
 
     LevelManager() = default;
     LevelManager(const LevelManager& other) = default;
     ~LevelManager() = default;
 
-    int GetIndexFromPosition(int x, int y) const;
-    void GetLocalPosition(int index, int width, int* outX, int* outY) const;
-    void ToWorld(const int localX, const int localY, float* worldX, float* worldY) const;
     void FindStartingLocation(int* x, int* y);
-    void GetLocalPosition(int index, int* outX, int* outY) const;
-    Block* FindBlockAt(int x, int y);
-    void Erase(Block* block);
-    void UpdateActiveBlocks(float dt);
-    void UpdateSelector(float dt);
-    void RemoveDeletedBlocks();
-
-    void OnBlockDestroyed(const BlockEvent& blockEvent);
+    void RenderGrid();
+    Block* GetBlockAt(int x, int y);
+    bool GetTile(int idx);
 };

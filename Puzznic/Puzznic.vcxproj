@@ -151,27 +151,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Sources\AnimatedBlock.cpp" />
     <ClCompile Include="Sources\Block.cpp" />
-    <ClCompile Include="Sources\GameObject.cpp" />
+    <ClCompile Include="Sources\Entity.cpp" />
     <ClCompile Include="Sources\GameState.cpp" />
+    <ClCompile Include="Sources\Grid.cpp" />
     <ClCompile Include="Sources\Levelmanager.cpp" />
     <ClCompile Include="Sources\MenuState.cpp" />
-    <ClCompile Include="Sources\MovingBlock.cpp" />
-    <ClCompile Include="Sources\MovingBlocks.cpp" />
+    <ClCompile Include="Sources\Platform.cpp" />
     <ClCompile Include="Sources\Puzznic.cpp" />
     <ClCompile Include="Sources\SaveGame.cpp" />
-    <ClCompile Include="Sources\Selector.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Sources\AnimatedBlock.h" />
     <ClInclude Include="Sources\Block.h" />
     <ClInclude Include="Sources\Config.h" />
-    <ClInclude Include="Sources\GameObject.h" />
+    <ClInclude Include="Sources\Entity.h" />
     <ClInclude Include="Sources\GameState.h" />
+    <ClInclude Include="Sources\Grid.h" />
     <ClInclude Include="Sources\LevelManager.h" />
     <ClInclude Include="Sources\MenuState.h" />
-    <ClInclude Include="Sources\MovingBlock.h" />
+    <ClInclude Include="Sources\Platform.h" />
     <ClInclude Include="Sources\SaveGame.h" />
-    <ClInclude Include="Sources\Selector.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\cengine\CEngine.vcxproj">
