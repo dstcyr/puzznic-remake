@@ -22,10 +22,6 @@
 // 3) there is a random effect on blocks.
 // 4) block fall one after the other not all together at the same time
 // 5) there are certain wall the selector can go over, while other not.
-
-
-
-
 INT WINAPI WinMain(HINSTANCE _In_ hInst, HINSTANCE _In_opt_ hPrev, PSTR _In_ cmd, INT _In_ flag)
 {
     std::string title = "Puzznic Remake";

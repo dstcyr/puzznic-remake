@@ -13,7 +13,7 @@ const int BACKGROUND_TILE = 2;
 const int SIZE_BACKGROUND_TILE = 3;
 const int LEVEL_OFFSET_X = 320;
 const int LEVEL_OFFSET_Y = 130;
-const float INTERP_SPEED = 0.3f;
+const float INTERP_SPEED = 2.3f;
 
 #if defined(_DEBUG)
 #define CHECK_MEMORY_LEAKS 0

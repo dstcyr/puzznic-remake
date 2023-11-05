@@ -196,11 +196,37 @@ bool LevelManager::GetTile(int idx)
     return INVALID_TILE;
 }
 
+bool LevelManager::Collides(Block* a, Block* b)
+{
+    float ax, ay;
+    a->GetPosition(&ax, &ay);
+
+    float bx, by;
+    b->GetPosition(&bx, &by);
+
+    return Engine::CheckRects(ax, ay, BLOCK_SIZE, BLOCK_SIZE, bx, by, BLOCK_SIZE, BLOCK_SIZE);
+}
+
 void LevelManager::Snap(float x, float y, float* wx, float* wy)
 {
     int gx, gy;
     Transform(x, y, &gx, &gy);
     Transform(gx, gy, wx, wy);
+}
+
+std::vector<Block*> LevelManager::GetCollidingBlocks(Block* block)
+{
+    std::vector<Block*> result;
+
+    for (Block* other : m_activeBlocks)
+    {
+        if (Collides(block, other))
+        {
+            result.push_back(other);
+        }
+    }
+
+    return result;
 }
 
 void LevelManager::FindStartingLocation(int* x, int* y)

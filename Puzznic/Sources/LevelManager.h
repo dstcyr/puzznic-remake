@@ -25,6 +25,8 @@ public:
     bool CanMove2(float x, float y, int dx, int dy);
     void Snap(float x, float y, float* wx, float* wy);
 
+    std::vector<Block*> GetCollidingBlocks(Block* block);
+
     CDelegate OnLevelCleared;
 
 private:
@@ -44,4 +46,5 @@ private:
     Block* GetPlatform(int x, int y);
     bool GetTile(int idx);
     void RenderBlocks();
+    bool Collides(Block* a, Block* b);
 };
