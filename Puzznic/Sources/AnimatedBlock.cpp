@@ -54,17 +54,17 @@ void AnimatedBlock::UpdateInterpolation(float dt)
     {
         float wx = Engine::Linear(m_interpTime, m_interpStartX, m_interpEndX, m_interpSpeed);
         float wy = Engine::Linear(m_interpTime, m_interpStartY, m_interpEndY, m_interpSpeed);
-        if (LevelManager::Get().CanMove(wx, wy))
+        //if (LevelManager::Get().CanMove(wx, wy))
         {
              m_x = wx;
              m_y = wy;
         }
-        else
-        {
-            LevelManager::Get().Snap(m_x, m_y, &m_x, &m_y);
-            m_moving = false;
-            return;
-        }
+        //else
+        //{
+        //    LevelManager::Get().Snap(m_x, m_y, &m_x, &m_y);
+        //    m_moving = false;
+        //    return;
+        //}
 
         m_interpTime += dt;
     }

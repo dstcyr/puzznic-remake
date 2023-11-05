@@ -15,15 +15,36 @@ void Platform::Update(float dt)
         std::vector<Block*> blocks;
         LevelManager::Get().GetBlocksOnTopOf(m_x, m_y, blocks);
 
-        int gapIdx = LevelManager::Get().FindGapFrom(m_x, m_y, m_directionX, m_directionY, blocks);
-        if (gapIdx >= 0)
+        //int gapIdx = LevelManager::Get().FindGapFrom(m_x, m_y, m_directionX, m_directionY, blocks);
+        //if (gapIdx >= 0)
+        if (LevelManager::Get().CanMove(m_x, m_y, m_directionX, m_directionY))
         {
-            LOG(LL_DEBUG, "Gap: %d (%d blocks)", gapIdx, static_cast<int>(blocks.size()));
-            SetupInterpolation(m_directionX, m_directionY);
+            //LOG(LL_DEBUG, "Gap: %d (%d blocks)", gapIdx, static_cast<int>(blocks.size()));
             for (Block* block : blocks)
             {
-                block->SetupInterpolation(m_directionX, m_directionY);
+                float bx, by;
+                block->GetPosition(&bx, &by);
+
+                if (!LevelManager::Get().CanMove(bx, by, m_directionX, m_directionY))
+                {
+                    m_directionX = -m_directionX;
+                    m_directionY = -m_directionY;
+                   return;
+                }
             }
+
+            for (Block* block : blocks)
+            {
+                float bx, by;
+                block->GetPosition(&bx, &by);
+
+                if (LevelManager::Get().CanMove(bx, by, m_directionX, m_directionY))
+                {
+                    block->SetupInterpolation(m_directionX, m_directionY);
+                }
+            }
+
+            SetupInterpolation(m_directionX, m_directionY);
         }
         else
         {

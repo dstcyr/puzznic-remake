@@ -156,6 +156,19 @@ bool LevelManager::CanFall(Block* block)
         );
     }
 
+    Block* platform = GetPlatform(gx, gy);
+
+    if (platform != nullptr)
+    {
+        float otherX, otherY;
+        platform->GetPosition(&otherX, &otherY);
+
+        return !Engine::CheckRects(
+            x, y, BLOCK_SIZE, BLOCK_SIZE,
+            otherX, otherY, BLOCK_SIZE, BLOCK_SIZE
+        );
+    }
+
     return true;
 }
 
@@ -180,6 +193,16 @@ bool LevelManager::CanMove(float x, float y)
     return true;
 }
 
+bool LevelManager::CanMove(float x, float y, int dx, int dy)
+{
+    int gx, gy;
+    Transform(x, y, &gx, &gy);
+    gx += dx;
+    gy += dy;
+
+    int idx = GetIndexFromPosition(gx, gy);
+    return m_gridData[idx] == EMPTY_TILE;
+}
 
 Block* LevelManager::GetBlockAt(int x, int y)
 {
@@ -200,3 +223,21 @@ Block* LevelManager::GetBlockAt(int x, int y)
     return nullptr;
 }
 
+Block* LevelManager::GetPlatform(int x, int y)
+{
+    for (Block* block : m_activePlatforms)
+    {
+        float wx, wy;
+        block->GetPosition(&wx, &wy);
+
+        int gx, gy;
+        Transform(wx, wy, &gx, &gy);
+
+        if (gx == x && gy == y)
+        {
+            return block;
+        }
+    }
+
+    return nullptr;
+}
