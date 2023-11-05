@@ -1,3 +1,4 @@
+
 #include "Platform.h"
 #include "Engine.h"
 #include "Config.h"
@@ -25,11 +26,12 @@ void Platform::Update(float dt)
                 float bx, by;
                 block->GetPosition(&bx, &by);
 
-                if (!LevelManager::Get().CanMove(bx, by, m_directionX, m_directionY))
+                if (!LevelManager::Get().CanMove2(bx, by, m_directionX, m_directionY))
                 {
                     m_directionX = -m_directionX;
                     m_directionY = -m_directionY;
-                   return;
+                    m_moving = false;
+                    return;
                 }
             }
 

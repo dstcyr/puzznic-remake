@@ -38,6 +38,10 @@ void Block::SetupInterpolation(int dx, int dy)
     m_interpTargetX = m_interpSourceX + dx;
     m_interpTargetY = m_interpSourceY + dy;
     LevelManager::Get().Transform(m_interpTargetX, m_interpTargetY, &m_interpEndX, &m_interpEndY);
+
+    // Move collision
+    //LevelManager::Get().MoveTile(m_interpSourceX, m_interpSourceY, m_interpTargetX, m_interpTargetY, m_blockID);
+    LevelManager::Get().MarkTile(m_interpSourceX, m_interpSourceY, m_interpTargetX, m_interpTargetY, m_blockID);
 }
 
 void Block::UpdateInterpolation(float dt)
@@ -60,6 +64,5 @@ void Block::InterpolationCompleted()
     // Snap
     LevelManager::Get().Transform(m_interpTargetX, m_interpTargetY, &m_x, &m_y);
 
-    // Move collision
-    LevelManager::Get().MoveTile(m_interpSourceX, m_interpSourceY, m_interpTargetX, m_interpTargetY, m_blockID);
+    LevelManager::Get().MarkTile(m_interpSourceX, m_interpSourceY, m_interpSourceX, m_interpSourceY, 0);
 }

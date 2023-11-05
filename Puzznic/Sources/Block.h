@@ -8,6 +8,7 @@ public:
     void Render() override;
     void SetID(int ID);
     virtual void SetupInterpolation(int dx, int dy);
+    virtual void UpdateInterpolation(float dt);
     bool IsMoving() const { return m_moving; }
 
 protected:
@@ -26,6 +27,5 @@ protected:
     bool m_moving = false;
     int m_blockID = -1;
 
-    virtual void UpdateInterpolation(float dt);
     virtual void InterpolationCompleted();
 };

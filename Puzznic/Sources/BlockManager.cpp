@@ -3,10 +3,6 @@
 
 void LevelManager::Update(float dt)
 {
-    for (Block* block : m_activePlatforms)
-    {
-        block->Update(dt);
-    }
 
     for (Block* block : m_activeBlocks)
     {
@@ -21,8 +17,14 @@ void LevelManager::Update(float dt)
             if (block && !block->IsMoving() && CanFall(block))
             {
                 block->SetupInterpolation(0, 1);
+                block->UpdateInterpolation(dt);
             }
         }
+    }
+
+    for (Block* block : m_activePlatforms)
+    {
+        block->Update(dt);
     }
 }
 
@@ -202,6 +204,35 @@ bool LevelManager::CanMove(float x, float y, int dx, int dy)
 
     int idx = GetIndexFromPosition(gx, gy);
     return m_gridData[idx] == EMPTY_TILE;
+}
+
+bool LevelManager::CanMove2(float x, float y, int dx, int dy)
+{
+    int gx, gy;
+    Transform(x, y, &gx, &gy);
+    gx += dx;
+    gy += dy;
+
+    Block* other = GetBlockAt(gx, gy);
+
+    if (other != nullptr)
+    {
+        float otherX, otherY;
+        other->GetPosition(&otherX, &otherY);
+
+        if (Engine::CheckRects(x, y, BLOCK_SIZE, BLOCK_SIZE, otherX, otherY, BLOCK_SIZE, BLOCK_SIZE))
+        {
+            return false;
+        }
+    }
+
+    int idx = GetIndexFromPosition(gx, gy);
+    if (m_gridData[idx] == EMPTY_TILE || m_gridData[idx] == WALL_TILE)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 Block* LevelManager::GetBlockAt(int x, int y)

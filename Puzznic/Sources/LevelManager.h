@@ -17,10 +17,12 @@ public:
     int FindGapFrom(float x, float y, int dx, int dy, const std::vector<Block*>& blocks);
     void GetBlocksOnTopOf(float x, float y, std::vector<Block*>& blocks);
     void MoveTile(int x1, int y1, int x2, int y2, int ID);
+    void MarkTile(int x1, int y1, int x2, int y2, int ID);
     bool CanFall(float x, float y);
     bool CanFall(Block* block);
     bool CanMove(float x, float y);
     bool CanMove(float x, float y, int dx, int dy);
+    bool CanMove2(float x, float y, int dx, int dy);
     void Snap(float x, float y, float* wx, float* wy);
 
     CDelegate OnLevelCleared;

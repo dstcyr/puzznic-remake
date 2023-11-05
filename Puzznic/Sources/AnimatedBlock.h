@@ -8,9 +8,9 @@ public:
     void Initialize() override;
     void Update(float dt) override;
     void Render() override;
+    void UpdateInterpolation(float dt) override;
 
 protected:
-    void UpdateInterpolation(float dt) override;
 
 private:
     Animation m_blockAnimation;

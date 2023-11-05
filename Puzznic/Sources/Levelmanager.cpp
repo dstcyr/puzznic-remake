@@ -137,6 +137,14 @@ void LevelManager::MoveTile(int x1, int y1, int x2, int y2, int ID)
     m_gridData[sourceIdx] = EMPTY_TILE;
 }
 
+void LevelManager::MarkTile(int x1, int y1, int x2, int y2, int ID)
+{
+    //int sourceIdx = GetIndexFromPosition(x1, y1);
+    int targetIdx = GetIndexFromPosition(x2, y2);
+    m_gridData[targetIdx] = ID;
+    //m_gridData[sourceIdx] = EMPTY_TILE;
+}
+
 void LevelManager::RenderGrid()
 {
     for (int y = 0; y < m_height; y++)
