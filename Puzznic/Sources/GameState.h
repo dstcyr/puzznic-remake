@@ -14,8 +14,4 @@ public:
 private:
     size_t m_whiteFont = 0;
     size_t m_orangeFont = 0;
-    bool m_levelCleared = false;
-    float m_levelClearedElapsed = 0.0f;
-
-    void OnLevelCleared(const Event& e);
 };
