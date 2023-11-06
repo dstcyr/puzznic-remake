@@ -151,14 +151,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Sources\Block.cpp" />
+    <ClCompile Include="Sources\Entity.cpp" />
     <ClCompile Include="Sources\GameState.cpp" />
+    <ClCompile Include="Sources\Level_Render.cpp" />
+    <ClCompile Include="Sources\Level_Grid.cpp" />
+    <ClCompile Include="Sources\Level_Loading.cpp" />
+    <ClCompile Include="Sources\Level_Update.cpp" />
     <ClCompile Include="Sources\MenuState.cpp" />
     <ClCompile Include="Sources\Puzznic.cpp" />
     <ClCompile Include="Sources\SaveGame.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Sources\Block.h" />
     <ClInclude Include="Sources\Config.h" />
+    <ClInclude Include="Sources\Entity.h" />
     <ClInclude Include="Sources\GameState.h" />
+    <ClInclude Include="Sources\Level.h" />
     <ClInclude Include="Sources\MenuState.h" />
     <ClInclude Include="Sources\SaveGame.h" />
   </ItemGroup>

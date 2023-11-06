@@ -15,6 +15,28 @@
 #include "C:\\vld\\include\\vld.h"
 #endif
 
+
+// LEVEL 1 - 2 : VPP3
+// LEVEL 1 - 3 : V33C
+// LEVEL 1 - 4 : VJJ7
+// LEVEL 1 - 5 : VCCB
+// LEVEL 1 - 6 : VRR5
+// LEVEL 1 - 7 : V77L
+// LEVEL 1 - 8 : VZZW
+// LEVEL 1 - 9 : VBBV
+// LEVEL 1 - 10: VMM3
+
+// LEVEL 2 - 1 : V55C
+// LEVEL 2 - 2 : VFF7
+// LEVEL 2 - 3 : VLLB
+// LEVEL 2 - 4 : VTT5
+// LEVEL 2 - 5 : VWWL
+// LEVEL 2 - 6 : 
+// LEVEL 2 - 7 : PPV3
+// LEVEL 2 - 8 : P3PC
+// LEVEL 2 - 9 : 
+// LEVEL 2 - 10: 
+
 INT WINAPI WinMain(HINSTANCE _In_ hInst, HINSTANCE _In_opt_ hPrev, PSTR _In_ cmd, INT _In_ flag)
 {
     std::string title = "Puzznic Remake";

@@ -9,6 +9,24 @@
       <Filter>States</Filter>
     </ClCompile>
     <ClCompile Include="Sources\SaveGame.cpp" />
+    <ClCompile Include="Sources\Level_Grid.cpp">
+      <Filter>Game\Level</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Level_Loading.cpp">
+      <Filter>Game\Level</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Level_Render.cpp">
+      <Filter>Game\Level</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Level_Update.cpp">
+      <Filter>Game\Level</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Block.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Entity.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\Config.h" />
@@ -19,6 +37,15 @@
       <Filter>States</Filter>
     </ClInclude>
     <ClInclude Include="Sources\SaveGame.h" />
+    <ClInclude Include="Sources\Level.h">
+      <Filter>Game\Level</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Entity.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Block.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="States">
@@ -26,6 +53,9 @@
     </Filter>
     <Filter Include="Game">
       <UniqueIdentifier>{e762302e-5e1b-4a4c-8409-1677b375145d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Level">
+      <UniqueIdentifier>{29da70e9-c1d8-40c8-aca8-20e5a82c09f2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
