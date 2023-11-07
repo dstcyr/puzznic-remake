@@ -8,6 +8,16 @@ int Level::GetIndex(int x, int y) const
     return static_cast<size_t>(x + m_width * y);
 }
 
+int Level::GetIndexInDirection(Block* block, int dx, float dy) const
+{
+    float centerX, centerY;
+    block->GetCenter(&centerX, &centerY);
+
+    int gridX, gridY;
+    Level::Get().Transform(centerX, centerY, &gridX, &gridY);
+    return Level::Get().GetIndex(gridX + dx, gridY + dy);
+}
+
 int Level::GetData(int x, int y) const
 {
     int idx = GetIndex(x, y);
@@ -56,13 +66,6 @@ void Level::Transform(float worldX, float worldY, int* localX, int* localY) cons
 {
     *localX = static_cast<int>((worldX - m_offsetX) / m_cellWidth);
     *localY = static_cast<int>((worldY - m_offsetY) / m_cellHeight);
-}
-
-int Level::GetIndexInDirection(float startX, float startY, int dx, int dy) const
-{
-    int localX, localY;
-    Transform(startX, startY, &localX, &localY);
-    return GetIndex(localX + dx, localY + dy);
 }
 
 Block* Level::CellHasBlock(int index) const

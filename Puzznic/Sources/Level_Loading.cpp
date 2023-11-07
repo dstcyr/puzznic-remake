@@ -49,7 +49,7 @@ void Level::Load(const std::string& filename)
 
                         if (tileNum == 4)
                         {
-                            DebugBlock* newBlock = new DebugBlock();
+                            PlacedBlock* newBlock = new PlacedBlock();
                             newBlock->SetID(tileNum);
                             newBlock->Initialize();
                             newBlock->SetPosition(worldX, worldY);
@@ -66,7 +66,7 @@ void Level::Load(const std::string& filename)
 
                         if (tileNum == 12)
                         {
-                            Platform* newBlock = new Platform();
+                            Platform* newBlock = new HorizontalPlatform();
                             newBlock->SetID(tileNum);
                             newBlock->Initialize();
                             newBlock->SetPosition(worldX, worldY);
@@ -77,7 +77,7 @@ void Level::Load(const std::string& filename)
 
                         if (tileNum == 13)
                         {
-                            Platform* newBlock = new Platform();
+                            Platform* newBlock = new VerticalPlatform();
                             newBlock->SetID(tileNum);
                             newBlock->Initialize();
                             newBlock->SetPosition(worldX, worldY);

@@ -20,8 +20,9 @@ public:
 
     void Transform(int localX, int localY, float* worldX, float* worldY) const;
     void Transform(float worldX, float worldY, int* localX, int* localY) const;
+    int GetIndex(int x, int y) const;
+    int GetIndexInDirection(Block* block, int dx, float dy) const;
 
-    int GetIndexInDirection(float startX, float startY, int dx, int dy) const;
     Block* CellHasBlock(int index) const;
     Block* CellHasBlockOrDestination(int index) const;
     Block* GetBlock(int index) const;
@@ -45,7 +46,6 @@ private:
     size_t m_backgroundTiles = 0;
     size_t m_whiteFont = 0;
 
-    int GetIndex(int x, int y) const;
     int GetData(int x, int y) const;
     int GetData(int index) const;
     void GetGridPosition(int index, int* outX, int* outY) const;
