@@ -30,6 +30,7 @@ public:
     bool CellIsWall(int index) const;
     bool Collides(Block* block) const;
     void GetBlockOnTop(Block* block, std::vector<Block*>& blocks);
+    int GetIndex(int x, int y) const;
 
 private:
     std::vector<int> m_LevelData;
@@ -45,7 +46,6 @@ private:
     size_t m_backgroundTiles = 0;
     size_t m_whiteFont = 0;
 
-    int GetIndex(int x, int y) const;
     int GetData(int x, int y) const;
     int GetData(int index) const;
     void GetGridPosition(int index, int* outX, int* outY) const;

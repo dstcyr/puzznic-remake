@@ -97,12 +97,12 @@ Block* Level::CellHasBlockOrDestination(int index) const
         float otherX, otherY;
         other->GetCenter(&otherX, &otherY);
 
-        // int destX, destY;
-        // other->GetDestination(&destX, &destY);
+        int destX, destY;
+        other->GetDestination(&destX, &destY);
 
         int ox, oy;
         Transform(otherX, otherY, &ox, &oy);
-        if ((ox == localX && oy == localY) /*|| (destX == localX && destY == localY)*/)
+        if ((ox == localX && oy == localY) || (destX == localX && destY == localY))
         {
             return other;
         }
@@ -201,8 +201,6 @@ bool Level::Collides(Block* block) const
 
 void Level::GetBlockOnTop(Block* block, std::vector<Block*>& blocks)
 {
-    blocks.clear();
-
     float bx, by;
     block->GetCenter(&bx, &by);
 
@@ -217,7 +215,7 @@ void Level::GetBlockOnTop(Block* block, std::vector<Block*>& blocks)
 
         while (gy >= 0 && (m_LevelData[idx] != WALL_TILE || m_LevelData[idx] != EMPTY_TILE))
         {
-            Block* block = GetBlockAndDestination(idx);
+            Block* block = GetBlock(idx);
             if (block != nullptr)
             {
                 blocks.push_back(block);
